@@ -1,7 +1,16 @@
+import { useEffect, useRef } from "react"
+
+const Form = () => {
+    return (
+        <div>form</div>
+    )
+}
+
 const Login = () => {
     return (
         <div>
-            This is Login
+            <Form></Form>
+            <Submit></Submit>
         </div>
     )
 }
