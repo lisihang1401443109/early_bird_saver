@@ -9,35 +9,29 @@ import { OpenStreetMapProvider } from 'leaflet-geosearch';
 import markerIconPng from "leaflet/dist/images/marker-icon.png"
 import {Icon} from 'leaflet'
 import { DatePicker, Space } from 'antd';
-import { axios } from 'axios'
+import axios from "axios";
 
 
 
 const Driver = (props) => {
 
     const getDriverInfo = (id) => {
-        return (id == -1) ? [] : {
-            driverName: 'Andrew',
-            scheduledTime: '10:00',
-            pickupLocation: 'location'
-        }
+        // return (id == -1) ? [] : {
+        //     driverName: 'Andrew',
+        //     scheduledTime: '10:00',
+        //     pickupLocation: 'location'
+        // }
+        return axios.get('http://172.20.10.3:5000/test_driver').then(res => res.data)
     }
 
-    const doMatch = (location, time, university) => {
-        // TODO
-        return -1
+    const goBack = () => {
+        
     }
-
-    const matchDriver = () => {
-        return doMatch(userInfo.pickupLocation, userInfo.scheduledTime, userInfo.universityId)
-    }
-
-
 
     const deleteDriver = () => {
         // TODO
 
-        setDriverID(-1)
+        setDriverID((prev) => '')
 
         update()
     }
@@ -46,10 +40,10 @@ const Driver = (props) => {
     const [driverInfo, setDriverInfo] = useState([])
     const userInfo = props.user
 
-    const update = (id) => {
+    const update = (newDriverInfo) => {
         setDriverInfo(
             (prev) => {
-                return {...(getDriverInfo(id))}
+                return {...newDriverInfo}
             }
         )
     }
@@ -61,8 +55,8 @@ const Driver = (props) => {
 
     return (
         <div className="site-card-border-less-wrapper">
-        <Card title={driverID >= 0 ? 'Your Driver' : 'No Driver'} bordered={false} style={{ width: 500 }}>
-        {driverID > -1 ? 
+        <Card title={driverID !== '' ? 'Your Driver' : 'No Driver'} bordered={false} style={{ width: 500 }}>
+        {driverID !== '' ? 
         <div>
             <div>
             <p>Driver Name: {driverInfo.driverName}</p>
@@ -71,8 +65,8 @@ const Driver = (props) => {
             </div>
             <Button type='primary' danger onClick={deleteDriver}>Delete Schedule</Button></div> :
         <div>
-            No driver Currently Selected
-            <Button type='primary' onClick={matchDriver}></Button>
+            No driver Currently Matched
+            <Button type='primary' onClick={goBack}></Button>
         </div>}
           
         </Card>
@@ -105,14 +99,21 @@ const PeopleInfo = (props) => {
 
     const selfInfo = props.user
 
+    const [driverLoc, setDriverLoc] = useState('')
+
     const doMatch = (location, time, university) => {
         // TODO
-        return new Promise((resolve, reject) => {
-            setTimeout(() => resolve({
-                driverName: 'Andrew',
-                scheduledTime: '8:00 am',
-                pickupLocation: 'location'
-            }), 10000)
+        // return new Promise((resolve, reject) => {
+        //     setTimeout(() => resolve({
+        //         driverName: 'Andrew',
+        //         scheduledTime: '8:00 am',
+        //         pickupLocation: 'location'
+        //     }), 10000)
+        // })
+        console.log('getting...')
+        return axios.get('http://localhost:5000/test_match_frontend').then((res) => {
+            setDriverLoc((orig) => res.data.lat + ', ' + res.data.lng)
+            return res.data
         })
     }
 
@@ -199,14 +200,14 @@ const PeopleInfo = (props) => {
             </div>
             <br></br>
             <Button type='primary' onClick={showModal}>find match</Button></div>
-            <Modal title="Basic Modal" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
-                <Card title="Your Driver" bordered={false} style={{ width: 300 }} >
+            <Modal title="Matched Driver" open={isModalOpen} onOk={handleOk} onCancel={handleCancel} width={700}>
+                <Card title="Your Driver" bordered={false} style={{ width: 500 }} >
                     <div>
                         {matched == 1 ? <div>
-                            <p>Driver Name: {matchedDriver.driverName}</p>
-                            <p>Scheduled Time: {matchedDriver.scheduledTime}</p>
-                            <p>Pick Up Location: {matchedDriver.pickupLocation}</p>
-                            <Button type="primary">Accept Driver</Button>
+                            <p>Driver Name: {matchedDriver.name}</p>
+                            {/* <p>Scheduled Time: "N/A"</p> */}
+                            <p>Pick Up Location: {driverLoc}</p>
+                            {/* <Button type="primary">Accept Driver</Button> */}
                         </div> : 
                         <div>matching...</div>}
                     </div>
@@ -250,7 +251,7 @@ const People = () => {
                     home: 'location',
                     time: '8:00am',
                     shared: true,
-                    driverID: 100
+                    driverID: 'man'
                 }
             )
         })
@@ -286,8 +287,8 @@ const People = () => {
                 // };
                 // })}
                 items = {[
-                    {key: 1, label : 'Info'},
-                    {key: 2, label : 'Shard'}
+                    {key: 1, label : 'My Info'},
+                    {key: 2, label : 'My Driver'}
                 ]}
                 onSelect= {(item) => {
                     // console.log(item)

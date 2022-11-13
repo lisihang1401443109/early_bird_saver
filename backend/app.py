@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from flask import Flask
 from flask import request
 from flask import jsonify
@@ -7,6 +9,8 @@ from demo_data import school, students
 from database import *
 
 app = Flask(__name__)
+
+# app.config['JSON_AS_ASCII'] = False
 
 app_id = 'otee17z9ye'
 hash_token = 'b3RlZTE3ejl5ZXx6SHVZV0xiY3NoNmYzTEF3Sjg2OVY3RlVTWmpMQlpYcDZIODhuUDhE'
