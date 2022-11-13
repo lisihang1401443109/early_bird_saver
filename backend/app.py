@@ -61,7 +61,7 @@ def test_frontend():
 @app.route("/test_match_frontend")
 @cross_origin(supports_credentials=True)
 def test_match_frontend():
-    return jsonify({"name": students[0]['name'], 'lat': students[0]['lat'], 'lng': students[0]['lng']})
+    return jsonify(students[1])
 
 
 @app.route("/test_person")
