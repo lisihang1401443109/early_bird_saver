@@ -76,8 +76,8 @@ const Myform = () => {
 
       <Form.Item label="userType">
           <Select onSelect={(value) => {setTypeUser(value)}}>
-            <Select.Option value="Car">Car</Select.Option>
-            <Select.Option value="People">People</Select.Option>
+            <Select.Option value="Driver">Driver</Select.Option>
+            <Select.Option value="People">Rider</Select.Option>
           </Select>
       </Form.Item>
 

@@ -46,11 +46,6 @@ const Driver = (props) => {
     const [mapOn, setMapOn] = useState(false)
 
     const getDriverInfo = (id) => {
-        // return (id == -1) ? [] : {
-        //     driverName: 'Andrew',
-        //     scheduledTime: '10:00',
-        //     pickupLocation: 'location'
-        // }
         return axios.get('http://172.20.10.3:5000/test_driver').then(res => res.data).then(res => {
             console.log(res)
             update({
@@ -125,19 +120,11 @@ const Driver = (props) => {
 
 const PeopleInfo = (props) => {
 
-    const selfInfo = props.user
+    const [selfInfo, setSelfInfo] = useState(props.user)
 
     const [driverLoc, setDriverLoc] = useState('')
 
     const doMatch = (location, time, university) => {
-        // TODO
-        // return new Promise((resolve, reject) => {
-        //     setTimeout(() => resolve({
-        //         driverName: 'Andrew',
-        //         scheduledTime: '8:00 am',
-        //         pickupLocation: 'location'
-        //     }), 10000)
-        // })
         console.log('getting...')
         return axios.get('http://localhost:5000/test_match_frontend').then((res) => {
             setDriverLoc((orig) => res.data.lat + ', ' + res.data.lng)
@@ -148,8 +135,6 @@ const PeopleInfo = (props) => {
     const matchDriver = () => {
         return doMatch(selfInfo.pickupLocation, selfInfo.scheduledTime, selfInfo.universityId)
     }
-
-    // console.log(selfInfo)
 
     const updateUserInformation = (userInfo) => {
         return 0
@@ -167,18 +152,18 @@ const PeopleInfo = (props) => {
         setCurrDate(selfInfo.time)
     }, [])
 
+
     useEffect(() => {
         const temp = {...selfInfo}
         temp.home = currLoc
         updateUserInformation(temp)
+        console.log(currDate)
     }, [currLoc, currDate])
 
     
 
     const showModal = () => {
-        console.log()
         const match = matchDriver()
-        console.log(match)
         match.then((res) => {
             setMatchedDriver( (prev) => {
                 return {
@@ -210,7 +195,7 @@ const PeopleInfo = (props) => {
     const content = (
         <div>
             <Space direction="vertical">
-                <DatePicker onChange={onChange} showTime={true}/>
+                <DatePicker onChange={onChange} showTime={true} showSecond={false}/>
             </Space>
         </div>
     )
@@ -223,8 +208,8 @@ const PeopleInfo = (props) => {
             <div>
             <p>Your Name: {selfInfo.name}</p>
             <p>Your Univeristy: {selfInfo.universityId}</p>
-            <p>Your Pick Up Location: <a onClick={() => setMapOn((prev) => {return !prev})}>{currLoc.lat + ', ' + currLoc.lng}</a></p>
-            <div>Your Scheduled Time:  <Popover content={content} title="Title" trigger="click"><Button>{currDate? currDate : "Find Your Time"}</Button></Popover></div>
+            <p>Your Pick Up Location: <a onClick={() => setMapOn((prev) => {return !prev})}>{currLoc ? currLoc.lat + ', ' + currLoc.lng : 'select location'}</a></p>
+            <div>Your Scheduled Time:  <Popover content={content} title="Title" trigger="click"><Button>{currDate ? currDate : "Find Your Time"}</Button></Popover></div>
             </div>
             <br></br>
             <Button type='primary' onClick={showModal}>find match</Button></div>
@@ -250,7 +235,7 @@ const PeopleInfo = (props) => {
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     />
-                <MyMap setCurrLoc = {setCurrLoc} startPin = {null}></MyMap>
+                <MyMap setCurrLoc = {setCurrLoc} startPin = {currLoc}></MyMap>
             </MapContainer>
         </>
         }
@@ -261,16 +246,11 @@ const People = () => {
 
     const { Header, Content, Footer } = Layout;
     const userId = useParams()
-    const [user, setUser] = useState({
-        name: '',
-        universityId: '',
-        home: '',
-        time: '',
-        shared: '',
-        driverID: ''
-    })
+    const [user, setUser] = useState([])
+
 
     const getUserInfo = (id) => {
+        // TODO
         return new Promise((resolve, reject) => {
             resolve(
                 {
@@ -286,11 +266,8 @@ const People = () => {
     }
 
     useEffect(() => {
-        // console.log(user)
         getUserInfo(userId).then(ppl => {
             setUser((usr) => {
-                    // console.log(Object.keys(ppl))
-                    // Object.keys(ppl).forEach(key => {console.log(usr)})
                     return {...ppl}
                 }
             )
