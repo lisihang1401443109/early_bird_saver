@@ -65,7 +65,7 @@ const Driver = (props) => {
 
         setDriverID((prev) => '')
 
-        update()
+        // update()
     }
 
     const [ driverID, setDriverID ] = useState(props.shared)
@@ -121,7 +121,8 @@ const Driver = (props) => {
 
 const PeopleInfo = (props) => {
 
-    const [selfInfo, setSelfInfo] = useState(props.user)
+    const selfInfo = props.user
+    const setSelfInfo = props.setUser
 
     const [driverLoc, setDriverLoc] = useState('')
 
@@ -170,9 +171,16 @@ const PeopleInfo = (props) => {
         const match = matchDriver()
         match.then((res) => {
             setMatchedDriver( (prev) => {
+                console.log(res.data)
+                setDriverLoc(
+                    '32.5415313, -122.3143853'
+                )
                 return {
-                    name: res.NAME,
-                    location: res.WAYPNTS[0]
+                    name: res.data.NAME,
+                    location: {
+                        lat: 30.0,
+                        lng: 31.0,
+                    }
                 }
             })
             console.log('matched')
@@ -224,7 +232,7 @@ const PeopleInfo = (props) => {
                         {matched == 1 ? <div>
                             <p>Driver Name: {matchedDriver.name}</p>
                             {/* <p>Scheduled Time: "N/A"</p> */}
-                            <p>Pick Up Location: {driverLoc}</p>
+                            Pick Up Location:<a onClick={setMapOn}> {driverLoc}</a>
                             {/* <Button type="primary">Accept Driver</Button> */}
                         </div> : 
                         <div>matching...</div>}
@@ -315,7 +323,7 @@ const People = () => {
             </Breadcrumb>
             <div className="site-layout-content">
                 {currKey == '2' ? <Driver shared={user.driverID} user = {user}></Driver> : 
-                <PeopleInfo user={user}></PeopleInfo>}
+                <PeopleInfo user={user} setUser = {setUser}></PeopleInfo>}
             </div>
             </Content>
             <Footer style={{ textAlign: 'center' }}>Ant Design ©2018 Created by Ant UED</Footer>
