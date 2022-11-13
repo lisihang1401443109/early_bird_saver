@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom"
 import { useEffect, useState } from "react"
 import { Breadcrumb, Layout, Menu, Card, Button, Modal, Popover } from 'antd';
-import { MapContainer, TileLayer, useMap, useMapEvents } from 'react-leaflet'
+import { MapContainer, TileLayer, useMap, useMapEvents, Polyline } from 'react-leaflet'
 import {Marker, Popup} from 'react-leaflet'
 import "leaflet/dist/leaflet.css"
 import 'leaflet-geosearch/dist/geosearch.css';
@@ -37,6 +37,40 @@ const MyMap = (props) => {
     <Marker position={position} icon={new Icon({iconUrl: markerIconPng, iconSize: [25, 41], iconAnchor: [12, 41]})} >
       <Popup>This Position</Popup>
     </Marker>
+  )
+}
+
+const MyRoute = (props) => {
+  const route = props.route
+
+  const limeOptions = { color: 'purple' }
+
+  return (<Polyline pathOptions={limeOptions} positions={route} />)
+}
+
+const Route = (props) => {
+
+  const driver = props.driver
+  driver.home = {
+    lat: 14.002,
+    lng: 43.339
+  }
+
+  const getRoute = (name) => {
+    return []
+  }
+
+  return (
+    <>
+    <MapContainer center={[driver.home.lat, driver.home.lng]} zoom={7} scrollWheelZoom={true} style = {{height: '100%', width: '100%', position: 'absolute', left: '0', top: '64px'}}>
+      <TileLayer
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+      {/* <MyMap setCurrLoc = {(_) => {console.log('hehe')}} startPin = {[driver.home.lat, driver.home.lng]}></MyMap> */}
+      <MyRoute route={() => getRoute(props.driver.name)}></MyRoute>
+    </MapContainer>
+    </>
   )
 }
 
@@ -220,7 +254,8 @@ useEffect(() => {
             defaultSelectedKeys={['1']}
             items = {[
                 {key: 1, label : 'My Info'},
-                {key: 2, label : 'My Riders'}
+                {key: 2, label : 'My Riders'},
+                {key: 3, label : 'My Route'}
             ]}
             onSelect= {(item) => {
                 setCurrKey(item.key)
@@ -235,8 +270,13 @@ useEffect(() => {
             <Breadcrumb.Item>App</Breadcrumb.Item> */}
         </Breadcrumb>
         <div className="site-layout-content">
-            {currKey == '2' ? <Rider riders={user.Riders}></Rider> : 
-            <PeopleInfo user={user}></PeopleInfo>}
+          {
+            {
+              2: <Rider riders={user.Riders}></Rider>,
+              1: <PeopleInfo user={user}></PeopleInfo>,
+              3: <Route driver={user}></Route>
+            }[currKey]
+          }
         </div>
         </Content>
         <Footer style={{ textAlign: 'center' }}>Ant Design ©2018 Created by Ant UED</Footer>
