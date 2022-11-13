@@ -23,8 +23,12 @@ const MyMap = (props) => {
           setPosition(e.latlng)
       }
       setCurrLoc(e.latlng)
+      console.log(e.latlng)
     },
-    
+    locationfound(e) {
+      console.log(e.latlng)
+    }
+
   })
 
   useEffect(() => {
@@ -46,17 +50,17 @@ const MyRoute = (props) => {
   const setRoute = props.setRoute
 
   const limeOptions = { color: 'purple',weight: '5'}
-  console.log('aaa')
-  console.log(route)
 
   return (<Polyline pathOptions={limeOptions} positions={route} />)
 }
 
 const Route = (props) => {
 
-  const driver = props.driver
+  // const driver = props.driver.locations
+  // console.log(driver)
   const [route, setRoute] = useState([])
 
+  const driver = {}
   driver.home = {
     lng: -122.46,
     lat: 37.759
@@ -65,19 +69,20 @@ const Route = (props) => {
   const getRoute = async () => {
     const res = await axios.get('http://localhost:5000/test_person');
     // console.log(res.data.ROUTE)
-    setRoute((orig) => res.data['ROUTE_r']);
+    setRoute(res.data['ROUTE_r']);
   }
+
+  getRoute()
 
   return (
     <>
-    <Button onClick={getRoute()}>show navigation</Button>
     <MapContainer center={[driver.home.lat, driver.home.lng]} zoom={17} scrollWheelZoom={true} style = {{height: '100%', width: '100%', position: 'absolute', left: '0', top: '64px'}}>
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
       {/* <MyMap setCurrLoc = {(_) => {console.log('hehe')}} startPin = {[driver.home.lat, driver.home.lng]}></MyMap> */}
-      <MyRoute route={route} setRoute = {setRoute}></MyRoute>
+      <MyRoute route={route}></MyRoute>
     </MapContainer>
     </>
   )
