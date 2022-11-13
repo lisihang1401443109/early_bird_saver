@@ -5,8 +5,12 @@ import requests
 import itertools
 from demo_data import school, students
 from database import *
+from flask_cors import CORS, cross_origin
+
+
 
 app = Flask(__name__)
+CORS(app, support_credentials=True)
 
 app_id = 'otee17z9ye'
 hash_token = 'b3RlZTE3ejl5ZXx6SHVZV0xiY3NoNmYzTEF3Sjg2OVY3RlVTWmpMQlpYcDZIODhuUDhE'
@@ -21,10 +25,12 @@ MINUTE_MAX = 4800
 
 
 @app.route("/")
+@cross_origin(supports_credentials=True)
 def hello_world():
     return "<p>Hello, World!</p>"
 
 @app.route("/test_match")
+@cross_origin(supports_credentials=True)
 def test_match():
     students = tablereturn()
     print(students)
@@ -36,11 +42,12 @@ def test_match():
     current_rider_location = [current_rider['LAT'], current_rider['LNG']]
     # extra_time_limits = [driver[]]
 
-
-    return ""
     best_pick_up(driver_locations, current_rider_location, )
 
+    return ""
+
 @app.route("/test_travel_time")
+@cross_origin(supports_credentials=True)
 def test_travel_time():
     print(travel_time([
         [students[0]['lat'], students[0]['lng']], 
@@ -59,6 +66,7 @@ def test_travel_time():
 
 
 @app.route("/test_pickup")
+@cross_origin(supports_credentials=True)
 def test_frontend():
     args_dict = request.args.to_dict()
     print(args_dict)
@@ -72,9 +80,9 @@ def test_frontend():
     # time passenger school -> driver
 
 @app.route("/test_match_frontend")
+@cross_origin(supports_credentials=True)
 def test_match_frontend():
     return jsonify({"name": students[0]['name'], 'lat': students[0]['lat'], 'lng': students[0]['lng']})
-
 
 # calculate time to travel along ordered waypoints
 def travel_time(waypoints):
