@@ -118,6 +118,13 @@ def travel_time(waypoints):
     print(f'calculated uncongested time is: {uncongested_time}')
 
     return time
+    
+@app.route("/test_driver")
+@cross_origin(supports_credentials=True)
+def test_driver():
+    return jsonify(
+        **students[0]
+    )
 
 
 def sort_waypoints(s, middle_waypoints, t):
