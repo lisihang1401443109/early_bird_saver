@@ -84,7 +84,7 @@ def test_person():
     ]
     student['WAYPNTS'] = [pos(students[0])] + [pos(rider)
                                                for rider in student['PSSNGRS']] + [pos(school)]
-    student['ROUTE'] = route(student['WAYPNTS'])
+    student['ROUTE'], student['CENTER'] = route(student['WAYPNTS'])
     return jsonify(
         **student
     )

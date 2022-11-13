@@ -37,9 +37,15 @@ def route(waypoints):
     response_dict = response.json()
     print(response_dict)
     points = response_dict['result']['trip']['routes'][0]['points']['coordinates']
+    points = [[point[1], point[0]] for point in points]
+    corner1 = response_dict['result']['trip']['routes'][0]['boundingBox']['corner1']['coordinates'][0]
+    corner2 = response_dict['result']['trip']['routes'][0]['boundingBox']['corner2']['coordinates'][0]
+    center = [(corner1[0] + corner2[0]) / 2, (corner1[1] + corner2[1]) / 2]
+    center = [center[1], center[0]]
     print(points)
+    print(center)
 
-    return points
+    return points, center
 
 # calculate time to travel along ordered waypoints
 
