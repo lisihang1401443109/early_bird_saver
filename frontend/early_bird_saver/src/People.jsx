@@ -13,6 +13,18 @@ const Driver = (props) => {
         }
     }
 
+    const doMatch = (location, time, university) => {
+        // TODO
+        return -1
+    }
+
+    const matchDriver = () => {
+        return doMatch(userInfo.pickupLocation, userInfo.scheduledTime, userInfo.universityId)
+    }
+
+
+
+
     const deleteDriver = () => {
         // TODO
 
@@ -23,6 +35,7 @@ const Driver = (props) => {
 
     const [ driverID, setDriverID ] = useState(props.shared)
     const [driverInfo, setDriverInfo] = useState([])
+    const userInfo = props.user
 
     const update = (id) => {
         setDriverInfo(
@@ -39,16 +52,20 @@ const Driver = (props) => {
 
     return (
         <div className="site-card-border-less-wrapper">
-        <Card title={driverID >= 0 ? 'Your Driver' : 'Your Matched Driver'} bordered={false} style={{ width: 300 }}>
-        {driverID > -1 ? <div>
-          <p>Driver Name: {driverInfo.driverName}</p>
-          <p>Scheduled Time: {driverInfo.scheduledTime}</p>
-          <p>Pick Up Location: {driverInfo.pickupLocation}</p>
-        </div> : 
+        <Card title={driverID >= 0 ? 'Your Driver' : 'No Driver'} bordered={false} style={{ width: 300 }}>
+        {driverID > -1 ? 
         <div>
-            noDriver
+            <div>
+            <p>Driver Name: {driverInfo.driverName}</p>
+            <p>Scheduled Time: {driverInfo.scheduledTime}</p>
+            <p>Pick Up Location: {driverInfo.pickupLocation}</p>
+            </div>
+            <Button type='primary' danger onClick={deleteDriver}>Delete Schedule</Button></div> :
+        <div>
+            No driver Currently Selected
+            <Button type='primary' onClick={matchDriver}></Button>
         </div>}
-          <Button type='primary' danger onClick={deleteDriver}>Delete Schedule</Button>
+          
         </Card>
       </div>
     )
@@ -122,7 +139,7 @@ const People = () => {
                 <Breadcrumb.Item>App</Breadcrumb.Item> */}
             </Breadcrumb>
             <div className="site-layout-content">
-                <Driver shared={user.driverID}></Driver>
+                <Driver shared={user.driverID} user = {user}></Driver>
             </div>
             </Content>
             <Footer style={{ textAlign: 'center' }}>Ant Design ©2018 Created by Ant UED</Footer>
