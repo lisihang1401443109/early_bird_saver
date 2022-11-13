@@ -16,7 +16,7 @@ const Myform = () => {
     const usernameRef = useRef('')
     const passwordRef = useRef('')
     const [typeUser, setTypeUser] = useState([])
-    const navigator = useNavigate()
+    const navig = useNavigate()
 
     const loginWithCredentials = (username, password, typeUser) => {
         return new Promise( (resolve, reject) => {
@@ -33,7 +33,7 @@ const Myform = () => {
         const login = loginWithCredentials(usernameRef.current.input.value, passwordRef.current.input.value, typeUser);
         login.then(
             (res) => {
-                navigator('/' + typeUser + '?userId=' + res)
+                navig('/' + typeUser + '?userId=' + res)
             }
         ).catch(
             (error) => {

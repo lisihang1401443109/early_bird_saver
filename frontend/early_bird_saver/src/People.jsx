@@ -1,8 +1,15 @@
 import { useParams } from "react-router-dom"
 import { useEffect, useState } from "react"
 import { Breadcrumb, Layout, Menu, Card, Button, Modal } from 'antd';
-import { useRef } from "react";
+import { MapContainer, TileLayer, useMap, useMapEvents } from 'react-leaflet'
+import {Marker, Popup} from 'react-leaflet'
+import "leaflet/dist/leaflet.css"
+import 'leaflet-geosearch/dist/geosearch.css';
+import { OpenStreetMapProvider } from 'leaflet-geosearch';
+import markerIconPng from "leaflet/dist/images/marker-icon.png"
+import {Icon} from 'leaflet'
 
+const provider = new OpenStreetMapProvider();
 
 const Driver = (props) => {
 
@@ -69,6 +76,27 @@ const Driver = (props) => {
           
         </Card>
       </div>
+    )
+}
+
+const MyMap = () => {
+    const [position, setPosition] = useState(null)
+    const map = useMapEvents({
+      click(e) {
+        console.log(e)
+        setPosition(e.latlng)
+      },
+    })
+
+    useEffect(() => {
+        console.log('loaded')
+        map.locate()
+    }, [])
+  
+    return position === null ? null : (
+      <Marker position={position} icon={new Icon({iconUrl: markerIconPng, iconSize: [25, 41], iconAnchor: [12, 41]})} >
+        <Popup>This Position</Popup>
+      </Marker>
     )
 }
 
@@ -150,7 +178,18 @@ const PeopleInfo = (props) => {
                 </Card>
             </Modal>
         </Card>
-        {mapOn && <div id="mapid"></div>}
+        {mapOn && 
+        <>
+            <MapContainer center={[51.505, -0.09]} zoom={13} scrollWheelZoom={true}>
+                <div style = {{height: '300px', width: '300px'}}></div>
+                <TileLayer
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    />
+                <MyMap></MyMap>
+            </MapContainer>
+        </>
+        }
     </div>)
 }
 
