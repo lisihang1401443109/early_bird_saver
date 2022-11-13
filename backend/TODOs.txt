@@ -1,1 +1,49 @@
 flask App
+
+id/name 
+id/name
+waypoint
+car owned
+driver expectation
+driver capacity
+driver carried
+passenger's driver(null)
+time 
+
+
+
+zhuce
+match
+update
+all passengers picked by a given driver name
+
+Date format: YYYY-MM-DDTHH:MM:SSZ
+
+
+test apis:
+
+route: /test_pickup
+params: {name: "Ben",
+  school: "SCU",
+  time: "2022-11-12T00:00:00Z"
+}
+return: {
+  "location": [
+    37.3523476,
+    -121.9408087
+  ],
+  "name": "Zach"
+}
+
+
+UCSF:37.7591842,-122.4607287
+
+The Tidelands at UCSF: Jamesina: 37.7588498,-122.4405667
+Colosimo Apartments: Colum: 37.7508946,-122.4323139
+Precita Park: Timuçin: 37.7473889,-122.4503856
+Palace of Fine Arts : Astrid: 37.8029305,-122.4706993
+San Francisco Fire Station 12: Čeněk: 37.7642565,-122.4545116
+Upper Douglass Dog Play Area: Kirsten:37.7493034,-122.4489804
+3145 Irving St: Đạt: 37.7629482,-122.4918542
+1630 22nd Ave: Barukh: 37.7572462,-122.4799424
+1540 6th Ave: Isaac: 37.7597484,-122.462488
