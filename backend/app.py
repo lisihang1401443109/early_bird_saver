@@ -8,7 +8,6 @@ from database import *
 from flask_cors import CORS, cross_origin
 
 
-
 app = Flask(__name__)
 CORS(app, support_credentials=True)
 
@@ -50,16 +49,16 @@ def test_match():
 @cross_origin(supports_credentials=True)
 def test_travel_time():
     print(travel_time([
-        [students[0]['lat'], students[0]['lng']], 
-        [school['lat'], school['lng']]
+        [students[0]['LAT'], students[0]['LNG']], 
+        [school['LAT'], school['LNG']]
     ]))
     print(travel_time([
-        [students[1]['lat'], students[1]['lng']], 
-        [school['lat'], school['lng']]
+        [students[1]['LAT'], students[1]['LNG']], 
+        [school['LAT'], school['LNG']]
     ]))
     print(travel_time([
-        [students[0]['lat'], students[0]['lng']], 
-        [students[1]['lat'], students[1]['lng']]
+        [students[0]['LAT'], students[0]['LNG']], 
+        [students[1]['LAT'], students[1]['LNG']]
     ]))
 
     return ""
@@ -69,7 +68,6 @@ def test_travel_time():
 @cross_origin(supports_credentials=True)
 def test_frontend():
     args_dict = request.args.to_dict()
-    print(args_dict)
     if args_dict['name'] == 'Ben' and args_dict['school'] == 'SCU' and args_dict['time'] == "2022-11-12T00:00:00Z":
         return jsonify(
             name="Zach",
@@ -125,7 +123,19 @@ def test_driver():
     return jsonify(
         **students[0]
     )
-
+    
+@app.route("/driver")
+@cross_origin(supports_credentials=True)
+def driver():
+    args_dict = request.args.to_dict()
+    name = args_dict['name']
+    students = tablereturn()
+    for student in students:
+        if student['NAME'] == name:
+            return jsonify(
+                **student
+            )
+    return ""
 
 def sort_waypoints(s, middle_waypoints, t):
     n = len(middle_waypoints)
