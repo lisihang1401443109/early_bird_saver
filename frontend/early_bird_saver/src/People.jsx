@@ -1,6 +1,7 @@
 import { useParams } from "react-router-dom"
 import { useEffect, useState } from "react"
-import { Breadcrumb, Layout, Menu, Card, Button } from 'antd';
+import { Breadcrumb, Layout, Menu, Card, Button, Modal } from 'antd';
+import { useRef } from "react";
 
 
 const Driver = (props) => {
@@ -71,6 +72,88 @@ const Driver = (props) => {
     )
 }
 
+const PeopleInfo = (props) => {
+
+    const selfInfo = props.user
+
+    const doMatch = (location, time, university) => {
+        // TODO
+        return new Promise((resolve, reject) => {
+            setTimeout(resolve({
+                driverName: 'Andrew',
+                scheduledTime: '8:00 am',
+                pickupLocation: 'location'
+            }), 2000)
+        })
+    }
+
+    const matchDriver = () => {
+        return doMatch(selfInfo.pickupLocation, selfInfo.scheduledTime, selfInfo.universityId)
+    }
+
+    console.log(selfInfo)
+
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [matchedDriver, setMatchedDriver] = useState([])
+    const [matched, setMatched] = useState(0)
+    const [mapOn, setMapOn] = useState(false)
+
+    const showModal = () => {
+        console.log()
+        const match = matchDriver()
+        console.log(match)
+        match.then((res) => {
+            setMatchedDriver( (prev) => {
+                return {
+                    ...res
+                }
+            })
+            console.log('matched')
+            console.log(res)
+            console.log('get here')
+            setMatched(
+                (prev) => {return 1}
+            )})
+        setIsModalOpen(true)
+    };
+
+    const handleOk = () => {
+        setIsModalOpen(false);
+    };
+
+    const handleCancel = () => {
+        setIsModalOpen(false);
+    };
+
+    return (        
+    <div className="site-card-border-less-wrapper">
+        <Card title="Your Info" bordered={false} style={{ width: 300 }}> 
+        <div>
+            <div>
+            <p>Your Name: {selfInfo.name}</p>
+            <p>Your Univeristy: {selfInfo.universityId}</p>
+            <p>Your Pick Up Location: <a onClick={() => setMapOn((prev) => {return !prev})}>{selfInfo.home}</a></p>
+            <p>Your Scheduled Time: {selfInfo.time}</p>
+            </div>
+            <Button type='primary' onClick={showModal}>find match</Button></div>
+            <Modal title="Basic Modal" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
+                <Card title="Your Driver" bordered={false} style={{ width: 300 }} >
+                    <div>
+                        {matched == 1 ? <div>
+                            <p>Driver Name: {matchedDriver.driverName}</p>
+                            <p>Scheduled Time: {matchedDriver.scheduledTime}</p>
+                            <p>Pick Up Location: {matchedDriver.pickupLocation}</p>
+                            <Button type="primary">Accept Driver</Button>
+                        </div> : 
+                        <div>matching...</div>}
+                    </div>
+                </Card>
+            </Modal>
+        </Card>
+        {mapOn && <div id="mapid"></div>}
+    </div>)
+}
+
 const People = () => {
 
     const { Header, Content, Footer } = Layout;
@@ -110,6 +193,8 @@ const People = () => {
             )
         })
     },[])
+
+    const [currKey, setCurrKey] = useState('')
     
     return (
         <Layout className="layout">
@@ -130,6 +215,11 @@ const People = () => {
                     {key: 1, label : 'Info'},
                     {key: 2, label : 'Shard'}
                 ]}
+                onSelect= {(item) => {
+                    // console.log(item)
+                    setCurrKey(item.key)
+                    console.log(currKey)
+                }}
             />
             </Header>
             <Content style={{ padding: '0 50px' }}>
@@ -139,7 +229,8 @@ const People = () => {
                 <Breadcrumb.Item>App</Breadcrumb.Item> */}
             </Breadcrumb>
             <div className="site-layout-content">
-                <Driver shared={user.driverID} user = {user}></Driver>
+                {currKey == '2' ? <Driver shared={user.driverID} user = {user}></Driver> : 
+                <PeopleInfo user={user}></PeopleInfo>}
             </div>
             </Content>
             <Footer style={{ textAlign: 'center' }}>Ant Design ©2018 Created by Ant UED</Footer>
