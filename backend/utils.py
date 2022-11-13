@@ -130,9 +130,10 @@ def person_by_name(name):
 
 def match(rider_name):
     rider = person_by_name(rider_name)
-    drivers = filter(
-        lambda driver: driver['DPRTRT'] == rider['PDRTRT'], drivers)
-    drivers.sort(lambda driver: distance.distance(
+    drivers = tablereturn()
+    drivers = list(filter(
+        lambda driver: driver['ISDRVR'] == 1 and driver['DPRTRT'] == rider['DPRTRT'], drivers))
+    drivers.sort(key=lambda driver: distance.distance(
         tuple(pos(driver)), tuple(pos(rider))))
 
     for driver in drivers:
@@ -141,11 +142,11 @@ def match(rider_name):
             [pos(driver), pos(school)])
         tablereturn()
 
-        current_riders = filter(
-            lambda rider: rider['PSSNGRDRVR'] == driver['NAME'], tablereturn())
+        current_riders = list(filter(
+            lambda rider: rider['ISDRVR'] == 0 and rider['PSSNGRDRVR'] == driver['NAME'], tablereturn()))
         sorted_waypoints = sort_waypoints(
             pos(driver), [pos(rider) for rider in current_riders] + [pos(rider)], pos(school))
-        pick_up_time = travel_time(sort_waypoints)
+        pick_up_time = travel_time(sorted_waypoints)
         extra_time = pick_up_time - direct_time
         if extra_time <= extra_time_limit:
             return driver

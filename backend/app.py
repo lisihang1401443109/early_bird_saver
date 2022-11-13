@@ -22,17 +22,7 @@ def hello_world():
 @app.route("/test_match")
 @cross_origin(supports_credentials=True)
 def test_match():
-    students = tablereturn()
-    drivers = [person for person in students if person['ISDRVR'] == 1]
-    riders = [person for person in students if person['ISDRVR'] == 0]
-    driver_locations = [[driver['LAT'], driver['LNG']] for driver in drivers]
-    current_rider = riders[0]
-    current_rider_location = [current_rider['LAT'], current_rider['LNG']]
-    extra_time_limits = [driver['EXPTDIF'] for driver in drivers]
-
-    best_pick_up(driver_locations, current_rider_location, extra_time_limits, )
-
-    return ""
+    return jsonify(match('Barukh'))
 
 
 @app.route("/test_travel_time")
@@ -71,7 +61,7 @@ def test_frontend():
 @app.route("/test_match_frontend")
 @cross_origin(supports_credentials=True)
 def test_match_frontend():
-    return jsonify({"name": students[0]['name'], 'lat': students[0]['lat'], 'lng': students[0]['lng']})
+    return jsonify(students[1])
 
 
 @app.route("/test_person")
@@ -81,6 +71,21 @@ def test_person():
     student['PSSNGRS'] = [
         students[1],
         students[2]
+    ]
+    student['WAYPNTS'] = [pos(students[0])] + [pos(rider)
+                                               for rider in student['PSSNGRS']] + [pos(school)]
+    student['ROUTE'], student['CENTER'] = route(student['WAYPNTS'])
+    return jsonify(
+        **student
+    )
+
+
+@app.route("/test_person2")
+@cross_origin(supports_credentials=True)
+def test_person2():
+    student = students[0]
+    student['PSSNGRS'] = [
+        students[1],
     ]
     student['WAYPNTS'] = [pos(students[0])] + [pos(rider)
                                                for rider in student['PSSNGRS']] + [pos(school)]

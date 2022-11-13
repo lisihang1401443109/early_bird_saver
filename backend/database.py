@@ -73,7 +73,7 @@ def tablereturn():
     res = []
     for rows in csr:
         res.append(dict(zip(["NAME", "LAT", "LNG", "ISDRVR", "EXPTDIF",
-                             "DRVRCAP", "DRVRCRD", "PSSNGRDRVR", "DEPRTRT"], rows)))
+                             "DRVRCAP", "DRVRCRD", "PSSNGRDRVR", "DPRTRT"], rows)))
 
     return res
 
