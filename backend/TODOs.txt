@@ -36,14 +36,11 @@ return: {
 }
 
 
-UCSF:37.7591842,-122.4607287
+UCSF: 37.76264542019544, -122.45870997887464
 
-The Tidelands at UCSF: Jamesina: 37.7588498,-122.4405667
-Colosimo Apartments: Colum: 37.7508946,-122.4323139
-Precita Park: Timuçin: 37.7473889,-122.4503856
-Palace of Fine Arts : Astrid: 37.8029305,-122.4706993
-San Francisco Fire Station 12: Čeněk: 37.7642565,-122.4545116
-Upper Douglass Dog Play Area: Kirsten:37.7493034,-122.4489804
-3145 Irving St: Đạt: 37.7629482,-122.4918542
-1630 22nd Ave: Barukh: 37.7572462,-122.4799424
-1540 6th Ave: Isaac: 37.7597484,-122.462488
+3145 Irving St: Đạt: 37.76270964874447, -122.49184078995876 // route 1 start
+1630 22nd Ave: Barukh: 37.757224811850456, -122.47964992710874 // route 1 wp 1
+1540 6th Ave: Isaac: 37.75987233949891, -122.46251464987701 // route 1 wp 2
+The Tidelands at UCSF: Jamesina: 37.76351495316134, -122.39091356730421 // route 2 start
+Colosimo Apartments: Colum: 37.75089524681442, -122.41583511451711 // route 2 wp 1
+San Francisco Fire Station 12: Čeněk: 37.76348887062549, -122.45260655336645 route 2 wp 2
