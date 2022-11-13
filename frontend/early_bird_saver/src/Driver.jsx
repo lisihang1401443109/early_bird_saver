@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { Breadcrumb, Layout, Menu, Card, Button, Modal, Popover } from 'antd';
 import { MapContainer, TileLayer, useMap, useMapEvents, Polyline } from 'react-leaflet'
 import {Marker, Popup} from 'react-leaflet'
@@ -76,27 +76,22 @@ const Route = (props) => {
 
 const Rider = (props) => {
 
-  const [riders, setRiders] = useState(props.riders)
+  const [riders, setRiders] = useState([...props.riders])
+  const [cont, setCont] = useState('')
 
-  const getRiderInfo = (riderName) => {
-    console.log('doing it')
-    return new Promise((resolve, reject) => {
-      resolve()
-    }).then((res) => {return {
-      name: 'Amy',
-      location: {lat: 51.51, lng: -0.08},
-      time: '8:00'
-    }}).then( (res) => {
-      setRiders( (tmp) => {
-          const cpy = [...tmp]
-          cpy[tmp.indexOf(riderName)] = res
-          return cpy
-      })
-    })
-  }
+  const getRiderInfo = (rider) => {
+      return {
+          name: 'Amy',
+          locations: {
+            lat: 30.77,
+            lng: 20.76,
+          },
+          time: '8:00'
+        }
+    }
+
 
   const [mapOn, setMapOn] = useState(false)
-  const [cont, setCont] = useState((<div>No Rider Yet</div>))
 
   const deleteRider = (index) => {
     setRiders((orig) => {
@@ -104,53 +99,78 @@ const Rider = (props) => {
     })
   }
 
+  // useEffect(() => {
+  //   console.log(mapOn)
+  // }, [mapOn])
+
   const display = (riderInfo, riderIndex) => {
     // console.log(riderInfo)
     return (
+      <div key={riderIndex}>
       <div className="site-card-border-less-wrapper">
       <Card title={riderInfo !== '' ? 'Your Rider' : 'No Rider'} bordered={false} style={{ width: 500 }}>
       <div>
           <div>
           <p>Rider Name: {riderInfo.name}</p>
           <p>Scheduled Time: {riderInfo.time}</p>
-          <p>Pick Up Location: <a onClick={() => setMapOn((prev) => {return !prev})}>{riderInfo.locations}</a></p>
+          <p>Pick Up Location: <a onClick={() => setMapOn((prev) => {return !prev})}>{[riderInfo.locations.lat + ', ' + riderInfo.locations.lng]}</a></p>
           
           </div>
           <Button type='primary' danger onClick={() => deleteRider(riderIndex)}>Delete Schedule</Button></div>
       </Card>
       {mapOn && 
       <>
-          <MapContainer center={[getRiderInfo.lat, getRiderInfo.lng]} zoom={20} scrollWheelZoom={true} style = {{height: '300px', width: '100%'}}>
+          <MapContainer center={[riderInfo.locations.lat, riderInfo.locations.lng]} zoom={20} scrollWheelZoom={true} style = {{height: '300px', width: '100%'}}>
               {/* <div style = {{height: '300px', width: '300px'}}></div> */}
               <TileLayer
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                   />
-              <MyMap setCurrLoc = {(_) => {console.log('hehe')}} startPin = {[getRiderInfo.lat, getRiderInfo.lng]}></MyMap>
+              <MyMap setCurrLoc = {(_) => {console.log('hehe')}} startPin = {[riderInfo.locations.lat, riderInfo.locations.lng]}></MyMap>
           </MapContainer>
       </>
       }
     </div>
+    </div>
     )
   }
 
-    return riders.length == 0 ? (<div>No Riders Yet</div>) : riders.map((obj) => {
-      if (typeof obj.then === 'function'){
-        return ''
-      }else{
-        return display(obj, riders.indexOf(obj))
-      }
+  const didMountRef = useRef(false);
+
+  useEffect( () => {
+    const a = riders.map((obj) => {
+      return getRiderInfo(obj)
     })
-  }
+    const b = a.map((obj) => {
+      return display(obj, a.indexOf(obj))
+    })
+    setCont((orig) => {
+      return b
+    })
+  }, [])
+
+  useEffect( didMountRef.current ? () => {
+    setCont((orig) => [...orig].splice(1, orig.length))
+  } : () => {
+    didMountRef.current=true
+  }, [riders])
+
+  return (riders.length === 0) ? (<div>No Riders Yet</div>) : cont
+}
 
 
 const PeopleInfo = (props) => {
 
-  const selfInfo = props.user 
+  // const [selfInfo, setSelfInfo] = useState(props.user)
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [mapOn, setMapOn] = useState(false)
   const [currLoc, setCurrLoc] = useState([])
   const [currDate, setCurrDate] = useState('')
+
+  // useEffect(() => {
+  //   setSelfInfo(props.user)
+  // }, [])
+  
 
   const showModal = () => {
     setIsModalOpen(true)
@@ -182,10 +202,10 @@ const PeopleInfo = (props) => {
   <Card title="Your Info" bordered={false} style={{ width: 500 }}> 
   <div>
       <div>
-      <p>Your Name: {selfInfo.name}</p>
-      <p>Your Univeristy: {selfInfo.universityId}</p>
+      <p>Your Name: {props.user.name}</p>
+      <p>Your Univeristy: {props.user.universityId}</p>
       <p>Your Pick Up Location: <a onClick={() => setMapOn((prev) => {return !prev})}>{currLoc.lat + ', ' + currLoc.lng}</a></p>
-      <p>Your Capacity: {(selfInfo.Riders ? selfInfo.capacity - selfInfo.Riders.length : -1) + '/' + selfInfo.capacity}</p>
+      <p>Your Capacity: {(props.user.Riders ? props.user.capacity - props.user.Riders.length : -1) + '/' + props.user.capacity}</p>
       <div>Your Scheduled Time:  <Popover content={content} title="Title" trigger="click"><Button>{currDate? currDate : "Find Your Time"}</Button></Popover></div>
       <br></br>
       <Button type="primary">Save</Button>
