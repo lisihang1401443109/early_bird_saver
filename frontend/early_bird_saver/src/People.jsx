@@ -9,6 +9,7 @@ import { OpenStreetMapProvider } from 'leaflet-geosearch';
 import markerIconPng from "leaflet/dist/images/marker-icon.png"
 import {Icon} from 'leaflet'
 import { DatePicker, Space } from 'antd';
+import { axios } from 'axios'
 
 
 
@@ -107,11 +108,11 @@ const PeopleInfo = (props) => {
     const doMatch = (location, time, university) => {
         // TODO
         return new Promise((resolve, reject) => {
-            setTimeout(resolve({
+            setTimeout(() => resolve({
                 driverName: 'Andrew',
                 scheduledTime: '8:00 am',
                 pickupLocation: 'location'
-            }), 2000)
+            }), 10000)
         })
     }
 
@@ -196,6 +197,7 @@ const PeopleInfo = (props) => {
             <p>Your Pick Up Location: <a onClick={() => setMapOn((prev) => {return !prev})}>{currLoc.lat + ', ' + currLoc.lng}</a></p>
             <div>Your Scheduled Time:  <Popover content={content} title="Title" trigger="click"><Button>{currDate? currDate : "Find Your Time"}</Button></Popover></div>
             </div>
+            <br></br>
             <Button type='primary' onClick={showModal}>find match</Button></div>
             <Modal title="Basic Modal" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
                 <Card title="Your Driver" bordered={false} style={{ width: 300 }} >
