@@ -9,76 +9,8 @@ import { OpenStreetMapProvider } from 'leaflet-geosearch';
 import markerIconPng from "leaflet/dist/images/marker-icon.png"
 import {Icon} from 'leaflet'
 import { DatePicker, Space } from 'antd';
-import { axios } from 'axios'
+import axios from "axios";
 
-
-
-const Driver = (props) => {
-
-    const getDriverInfo = (id) => {
-        return (id == -1) ? [] : {
-            driverName: 'Andrew',
-            scheduledTime: '10:00',
-            pickupLocation: 'location'
-        }
-    }
-
-    const doMatch = (location, time, university) => {
-        // TODO
-        return -1
-    }
-
-    const matchDriver = () => {
-        return doMatch(userInfo.pickupLocation, userInfo.scheduledTime, userInfo.universityId)
-    }
-
-
-
-    const deleteDriver = () => {
-        // TODO
-
-        setDriverID(-1)
-
-        update()
-    }
-
-    const [ driverID, setDriverID ] = useState(props.shared)
-    const [driverInfo, setDriverInfo] = useState([])
-    const userInfo = props.user
-
-    const update = (id) => {
-        setDriverInfo(
-            (prev) => {
-                return {...(getDriverInfo(id))}
-            }
-        )
-    }
-
-    useEffect(update, [])
-    
-    console.log(driverID)
-    console.log(getDriverInfo(driverID))
-
-    return (
-        <div className="site-card-border-less-wrapper">
-        <Card title={driverID >= 0 ? 'Your Driver' : 'No Driver'} bordered={false} style={{ width: 500 }}>
-        {driverID > -1 ? 
-        <div>
-            <div>
-            <p>Driver Name: {driverInfo.driverName}</p>
-            <p>Scheduled Time: {driverInfo.scheduledTime}</p>
-            <p>Pick Up Location: {driverInfo.pickupLocation}</p>
-            </div>
-            <Button type='primary' danger onClick={deleteDriver}>Delete Schedule</Button></div> :
-        <div>
-            No driver Currently Selected
-            <Button type='primary' onClick={matchDriver}></Button>
-        </div>}
-          
-        </Card>
-      </div>
-    )
-}
 
 const MyMap = (props) => {
 
@@ -88,10 +20,18 @@ const MyMap = (props) => {
     const map = useMapEvents({
       click(e) {
         console.log(e)
-        setPosition(e.latlng)
+        if (!props.startPin){
+            setPosition(e.latlng)
+        }
         setCurrLoc(e.latlng)
       },
     })
+
+    useEffect(() => {
+        if (props.startPin) {
+            setPosition(props.startPin)
+        }
+    }, [])
 
   
     return position === null ? null : (
@@ -101,26 +41,100 @@ const MyMap = (props) => {
     )
 }
 
+const Driver = (props) => {
+
+    const [mapOn, setMapOn] = useState(false)
+
+    const getDriverInfo = (id) => {
+        return axios.get('http://172.20.10.3:5000/test_driver').then(res => res.data).then(res => {
+            console.log(res)
+            update({
+            driverName: res.name,
+            scheduledTime: res.d_time,
+            pickupLocation: res.lat + ', ' + res.lng,
+        })})
+    }
+
+    const goBack = () => {
+        
+    }
+
+    const deleteDriver = () => {
+        // TODO
+
+        setDriverID((prev) => '')
+
+        update()
+    }
+
+    const [ driverID, setDriverID ] = useState(props.shared)
+    const [driverInfo, setDriverInfo] = useState([])
+    const userInfo = props.user
+
+    const update = (newDriverInfo) => {
+        setDriverInfo(
+            (prev) => {
+                return {...newDriverInfo}
+            }
+        )
+    }
+
+    useEffect(() => {getDriverInfo('man')}, [])
+    
+
+    return (
+        <div className="site-card-border-less-wrapper">
+        <Card title={driverID !== '' ? 'Your Driver' : 'No Driver'} bordered={false} style={{ width: 500 }}>
+        {driverID !== '' ? 
+        <div>
+            <div>
+            <p>Driver Name: {driverInfo.driverName}</p>
+            <p>Scheduled Time: {driverInfo.scheduledTime}</p>
+            <p>Pick Up Location: <a onClick={() => setMapOn((prev) => {return !prev})}>{driverInfo.pickupLocation}</a></p>
+            
+            </div>
+            <Button type='primary' danger onClick={deleteDriver}>Delete Schedule</Button></div> :
+        <div>
+            No driver Currently Matched
+            <Button type='primary' onClick={goBack}></Button>
+        </div>}
+        </Card>
+
+        {mapOn && 
+        <>
+            <MapContainer center={[driverInfo.pickupLocation.split(', ')[0], driverInfo.pickupLocation.split(', ')[1]]} zoom={20} scrollWheelZoom={true} style = {{height: '300px', width: '100%'}}>
+                {/* <div style = {{height: '300px', width: '300px'}}></div> */}
+                <TileLayer
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    />
+                <MyMap setCurrLoc = {(_) => {console.log('hehe')}} startPin = {[driverInfo.pickupLocation.split(', ')[0], driverInfo.pickupLocation.split(', ')[1]]}></MyMap>
+            </MapContainer>
+        </>
+        }
+      </div>
+    )
+}
+
+
+
 const PeopleInfo = (props) => {
 
-    const selfInfo = props.user
+    const [selfInfo, setSelfInfo] = useState(props.user)
+
+    const [driverLoc, setDriverLoc] = useState('')
 
     const doMatch = (location, time, university) => {
-        // TODO
-        return new Promise((resolve, reject) => {
-            setTimeout(() => resolve({
-                driverName: 'Andrew',
-                scheduledTime: '8:00 am',
-                pickupLocation: 'location'
-            }), 10000)
+        console.log('getting...')
+        return axios.get('http://localhost:5000/test_match_frontend').then((res) => {
+            setDriverLoc((orig) => res.data.lat + ', ' + res.data.lng)
+            return res.data
         })
     }
 
     const matchDriver = () => {
         return doMatch(selfInfo.pickupLocation, selfInfo.scheduledTime, selfInfo.universityId)
     }
-
-    // console.log(selfInfo)
 
     const updateUserInformation = (userInfo) => {
         return 0
@@ -138,18 +152,18 @@ const PeopleInfo = (props) => {
         setCurrDate(selfInfo.time)
     }, [])
 
+
     useEffect(() => {
         const temp = {...selfInfo}
         temp.home = currLoc
         updateUserInformation(temp)
+        console.log(currDate)
     }, [currLoc, currDate])
 
     
 
     const showModal = () => {
-        console.log()
         const match = matchDriver()
-        console.log(match)
         match.then((res) => {
             setMatchedDriver( (prev) => {
                 return {
@@ -181,7 +195,7 @@ const PeopleInfo = (props) => {
     const content = (
         <div>
             <Space direction="vertical">
-                <DatePicker onChange={onChange} showTime={true}/>
+                <DatePicker onChange={onChange} showTime={true} showSecond={false}/>
             </Space>
         </div>
     )
@@ -194,19 +208,19 @@ const PeopleInfo = (props) => {
             <div>
             <p>Your Name: {selfInfo.name}</p>
             <p>Your Univeristy: {selfInfo.universityId}</p>
-            <p>Your Pick Up Location: <a onClick={() => setMapOn((prev) => {return !prev})}>{currLoc.lat + ', ' + currLoc.lng}</a></p>
-            <div>Your Scheduled Time:  <Popover content={content} title="Title" trigger="click"><Button>{currDate? currDate : "Find Your Time"}</Button></Popover></div>
+            <p>Your Pick Up Location: <a onClick={() => setMapOn((prev) => {return !prev})}>{currLoc ? currLoc.lat + ', ' + currLoc.lng : 'select location'}</a></p>
+            <div>Your Scheduled Time:  <Popover content={content} title="Title" trigger="click"><Button>{currDate ? currDate : "Find Your Time"}</Button></Popover></div>
             </div>
             <br></br>
             <Button type='primary' onClick={showModal}>find match</Button></div>
-            <Modal title="Basic Modal" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
-                <Card title="Your Driver" bordered={false} style={{ width: 300 }} >
+            <Modal title="Matched Driver" open={isModalOpen} onOk={handleOk} onCancel={handleCancel} width={700}>
+                <Card title="Your Driver" bordered={false} style={{ width: 500 }} >
                     <div>
                         {matched == 1 ? <div>
-                            <p>Driver Name: {matchedDriver.driverName}</p>
-                            <p>Scheduled Time: {matchedDriver.scheduledTime}</p>
-                            <p>Pick Up Location: {matchedDriver.pickupLocation}</p>
-                            <Button type="primary">Accept Driver</Button>
+                            <p>Driver Name: {matchedDriver.name}</p>
+                            {/* <p>Scheduled Time: "N/A"</p> */}
+                            <p>Pick Up Location: {driverLoc}</p>
+                            {/* <Button type="primary">Accept Driver</Button> */}
                         </div> : 
                         <div>matching...</div>}
                     </div>
@@ -215,13 +229,13 @@ const PeopleInfo = (props) => {
         </Card>
         {mapOn && 
         <>
-            <MapContainer center={[37.7591842,-122.4607287]} zoom={13} scrollWheelZoom={true}>
-                <div style = {{height: '300px', width: '300px'}}></div>
+            <MapContainer center={[37.7591842,-122.4607287]} zoom={20} scrollWheelZoom={true} style = {{height: '300px', width: '100%'}}>
+                {/* <div style = {{height: '300px', width: '300px'}}></div> */}
                 <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     />
-                <MyMap setCurrLoc = {setCurrLoc}></MyMap>
+                <MyMap setCurrLoc = {setCurrLoc} startPin = {currLoc}></MyMap>
             </MapContainer>
         </>
         }
@@ -232,16 +246,11 @@ const People = () => {
 
     const { Header, Content, Footer } = Layout;
     const userId = useParams()
-    const [user, setUser] = useState({
-        name: '',
-        universityId: '',
-        home: '',
-        time: '',
-        shared: '',
-        driverID: ''
-    })
+    const [user, setUser] = useState([])
+
 
     const getUserInfo = (id) => {
+        // TODO
         return new Promise((resolve, reject) => {
             resolve(
                 {
@@ -250,18 +259,15 @@ const People = () => {
                     home: 'location',
                     time: '8:00am',
                     shared: true,
-                    driverID: 100
+                    driverID: 'man'
                 }
             )
         })
     }
 
     useEffect(() => {
-        // console.log(user)
         getUserInfo(userId).then(ppl => {
             setUser((usr) => {
-                    // console.log(Object.keys(ppl))
-                    // Object.keys(ppl).forEach(key => {console.log(usr)})
                     return {...ppl}
                 }
             )
@@ -277,7 +283,7 @@ const People = () => {
             <Menu
                 theme="dark"
                 mode="horizontal"
-                defaultSelectedKeys={['2']}
+                defaultSelectedKeys={['1']}
                 // items={new Array(2).fill(null).map((_, index) => {
                 // const key = index + 1;
                 // return {
@@ -286,8 +292,8 @@ const People = () => {
                 // };
                 // })}
                 items = {[
-                    {key: 1, label : 'Info'},
-                    {key: 2, label : 'Shard'}
+                    {key: 1, label : 'My Info'},
+                    {key: 2, label : 'My Driver'}
                 ]}
                 onSelect= {(item) => {
                     // console.log(item)
