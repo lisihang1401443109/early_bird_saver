@@ -12,8 +12,38 @@ import { DatePicker, Space } from 'antd';
 import axios from "axios";
 
 
+const MyMap = (props) => {
+
+    const setCurrLoc = props.setCurrLoc
+    
+    const [position, setPosition] = useState(null)
+    const map = useMapEvents({
+      click(e) {
+        console.log(e)
+        if (!props.startPin){
+            setPosition(e.latlng)
+        }
+        setCurrLoc(e.latlng)
+      },
+    })
+
+    useEffect(() => {
+        if (props.startPin) {
+            setPosition(props.startPin)
+        }
+    }, [])
+
+  
+    return position === null ? null : (
+      <Marker position={position} icon={new Icon({iconUrl: markerIconPng, iconSize: [25, 41], iconAnchor: [12, 41]})} >
+        <Popup>This Position</Popup>
+      </Marker>
+    )
+}
 
 const Driver = (props) => {
+
+    const [mapOn, setMapOn] = useState(false)
 
     const getDriverInfo = (id) => {
         // return (id == -1) ? [] : {
@@ -21,7 +51,13 @@ const Driver = (props) => {
         //     scheduledTime: '10:00',
         //     pickupLocation: 'location'
         // }
-        return axios.get('http://172.20.10.3:5000/test_driver').then(res => res.data)
+        return axios.get('http://172.20.10.3:5000/test_driver').then(res => res.data).then(res => {
+            console.log(res)
+            update({
+            driverName: res.name,
+            scheduledTime: res.d_time,
+            pickupLocation: res.lat + ', ' + res.lng,
+        })})
     }
 
     const goBack = () => {
@@ -48,10 +84,8 @@ const Driver = (props) => {
         )
     }
 
-    useEffect(update, [])
+    useEffect(() => {getDriverInfo('man')}, [])
     
-    console.log(driverID)
-    console.log(getDriverInfo(driverID))
 
     return (
         <div className="site-card-border-less-wrapper">
@@ -61,39 +95,33 @@ const Driver = (props) => {
             <div>
             <p>Driver Name: {driverInfo.driverName}</p>
             <p>Scheduled Time: {driverInfo.scheduledTime}</p>
-            <p>Pick Up Location: {driverInfo.pickupLocation}</p>
+            <p>Pick Up Location: <a onClick={() => setMapOn((prev) => {return !prev})}>{driverInfo.pickupLocation}</a></p>
+            
             </div>
             <Button type='primary' danger onClick={deleteDriver}>Delete Schedule</Button></div> :
         <div>
             No driver Currently Matched
             <Button type='primary' onClick={goBack}></Button>
         </div>}
-          
         </Card>
+
+        {mapOn && 
+        <>
+            <MapContainer center={[driverInfo.pickupLocation.split(', ')[0], driverInfo.pickupLocation.split(', ')[1]]} zoom={20} scrollWheelZoom={true} style = {{height: '300px', width: '100%'}}>
+                {/* <div style = {{height: '300px', width: '300px'}}></div> */}
+                <TileLayer
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    />
+                <MyMap setCurrLoc = {(_) => {console.log('hehe')}} startPin = {[driverInfo.pickupLocation.split(', ')[0], driverInfo.pickupLocation.split(', ')[1]]}></MyMap>
+            </MapContainer>
+        </>
+        }
       </div>
     )
 }
 
-const MyMap = (props) => {
 
-    const setCurrLoc = props.setCurrLoc
-    
-    const [position, setPosition] = useState(null)
-    const map = useMapEvents({
-      click(e) {
-        console.log(e)
-        setPosition(e.latlng)
-        setCurrLoc(e.latlng)
-      },
-    })
-
-  
-    return position === null ? null : (
-      <Marker position={position} icon={new Icon({iconUrl: markerIconPng, iconSize: [25, 41], iconAnchor: [12, 41]})} >
-        <Popup>This Position</Popup>
-      </Marker>
-    )
-}
 
 const PeopleInfo = (props) => {
 
@@ -216,13 +244,13 @@ const PeopleInfo = (props) => {
         </Card>
         {mapOn && 
         <>
-            <MapContainer center={[37.7591842,-122.4607287]} zoom={13} scrollWheelZoom={true}>
-                <div style = {{height: '300px', width: '300px'}}></div>
+            <MapContainer center={[37.7591842,-122.4607287]} zoom={20} scrollWheelZoom={true} style = {{height: '300px', width: '100%'}}>
+                {/* <div style = {{height: '300px', width: '300px'}}></div> */}
                 <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     />
-                <MyMap setCurrLoc = {setCurrLoc}></MyMap>
+                <MyMap setCurrLoc = {setCurrLoc} startPin = {null}></MyMap>
             </MapContainer>
         </>
         }
@@ -278,7 +306,7 @@ const People = () => {
             <Menu
                 theme="dark"
                 mode="horizontal"
-                defaultSelectedKeys={['2']}
+                defaultSelectedKeys={['1']}
                 // items={new Array(2).fill(null).map((_, index) => {
                 // const key = index + 1;
                 // return {
