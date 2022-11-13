@@ -46,12 +46,13 @@ const Driver = (props) => {
     const [mapOn, setMapOn] = useState(false)
 
     const getDriverInfo = (id) => {
-        return axios.get('http://172.20.10.3:5000/test_driver').then(res => res.data).then(res => {
+        return axios.get('http://localhost:5000/test_person').then(res => res.data).then(res => {
+            console.log('hi there')
             console.log(res)
             update({
-            driverName: res.name,
-            scheduledTime: res.d_time,
-            pickupLocation: res.lat + ', ' + res.lng,
+            driverName: res.NAME,
+            scheduledTime: res.DPRTRT,
+            pickupLocation: res.LAT + ', ' + res.LNG,
         })})
     }
 
@@ -127,8 +128,10 @@ const PeopleInfo = (props) => {
     const doMatch = (location, time, university) => {
         console.log('getting...')
         return axios.get('http://localhost:5000/test_match_frontend').then((res) => {
-            setDriverLoc((orig) => res.data.lat + ', ' + res.data.lng)
-            return res.data
+            console.log('hhhh')
+            console.log(res)
+            setDriverLoc((orig) => res.LAT + ', ' + res.LNG)
+            return res
         })
     }
 
@@ -150,6 +153,7 @@ const PeopleInfo = (props) => {
     useEffect(() => {
         setCurrLoc(selfInfo.home)
         setCurrDate(selfInfo.time)
+        doMatch(0, 0, 0)
     }, [])
 
 
@@ -167,7 +171,8 @@ const PeopleInfo = (props) => {
         match.then((res) => {
             setMatchedDriver( (prev) => {
                 return {
-                    ...res
+                    name: res.NAME,
+                    location: res.WAYPNTS[0]
                 }
             })
             console.log('matched')

@@ -59,29 +59,51 @@ const Route = (props) => {
   // const driver = props.driver.locations
   // console.log(driver)
   const [route, setRoute] = useState([])
+  const [center, setCenter] = useState([37.760081344794784, -122.47547208977188])
+  const [markers, setMarkers] = useState([])
 
-  const driver = {}
-  driver.home = {
-    lng: -122.46,
-    lat: 37.759
-  }
+  // const home = {
+  //   lng: -122.46,
+  //   lat: 37.759
+  // }
 
   const getRoute = async () => {
     const res = await axios.get('http://localhost:5000/test_person');
     // console.log(res.data.ROUTE)
-    setRoute(res.data['ROUTE_r']);
+    setRoute(res.data['ROUTE']);
+    setCenter(res.data.CENTER)
+    // console.log(res.data)
+    console.log(
+      res.data.WAYPNTS.map((obj) => {
+        (<Marker position={obj} icon={new Icon({iconUrl: markerIconPng, iconSize: [25, 41], iconAnchor: [12, 41]})} ></Marker>)
+      })
+    )
+    setMarkers(res.data.WAYPNTS.map((obj) => {
+      return (<Marker position={obj} icon={new Icon({iconUrl: markerIconPng, iconSize: [25, 41], iconAnchor: [12, 41]})} ></Marker>)
+    }))
   }
 
-  getRoute()
+  useEffect(() => {
+    getRoute()
+  }, [])
+
+  useEffect(() => {
+    console.log(markers)
+  }, [markers])
+
+  // useEffect(() => {
+  //   console.log(center)
+  // }, [ center ])
+
 
   return (
     <>
-    <MapContainer center={[driver.home.lat, driver.home.lng]} zoom={17} scrollWheelZoom={true} style = {{height: '100%', width: '100%', position: 'absolute', left: '0', top: '64px'}}>
+    <MapContainer center={center} zoom={15} scrollWheelZoom={true} style = {{height: '100%', width: '100%', position: 'absolute', left: '0', top: '64px'}}>
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-      {/* <MyMap setCurrLoc = {(_) => {console.log('hehe')}} startPin = {[driver.home.lat, driver.home.lng]}></MyMap> */}
+        {markers}
       <MyRoute route={route}></MyRoute>
     </MapContainer>
     </>
@@ -90,19 +112,16 @@ const Route = (props) => {
 
 const Rider = (props) => {
 
-  const [riders, setRiders] = useState([...props.riders])
+  const [riders, setRiders] = useState(props.riders)
   const [cont, setCont] = useState('')
 
   const getRiderInfo = (rider) => {
-      return {
-          name: 'Amy',
-          locations: {
-            lat: 30.77,
-            lng: 20.76,
-          },
-          time: '8:00'
-        }
+    return {
+      name: rider.NAME,
+      locations: {lat: rider.LAT, lng: rider.LNG},
+      time: rider.DPRTRT,
     }
+  }
 
 
   const [mapOn, setMapOn] = useState(false)
@@ -206,13 +225,14 @@ const PeopleInfo = (props) => {
   const content = (
     <div>
         <Space direction="vertical">
-            <DatePicker onChange={onChange} showTime={true}/>
+            <DatePicker onChange={onChange} showTime={true} showSecond={false}/>
         </Space>
     </div>
 )
 
 
-  return ( <div className="site-card-border-less-wrapper">
+  return ( 
+  <div className="site-card-border-less-wrapper">
   <Card title="Your Info" bordered={false} style={{ width: 500 }}> 
   <div>
       <div>
@@ -253,18 +273,33 @@ const Driver = () => {
 
   const getUserInfo = (id) => {
     // TODO
-    return new Promise((resolve, reject) => {
-        resolve(
-            {
-                name: 'Sihang Li',
-                universityId: 0,
-                home: 'location',
-                time: '8:00am',
-                shared: true,
-                Riders: ['john1', 'john2'],
-                capacity: 3
-            }
-        )
+    // return new Promise((resolve, reject) => {
+    //     resolve(
+    //         {
+    //             name: 'Sihang Li',
+    //             universityId: 0,
+    //             home: 'location',
+    //             time: '8:00am',
+    //             shared: true,
+    //             Riders: ['john1', 'john2'],
+    //             capacity: 3
+    //         }
+    //     )
+    // })
+    return axios.get('http://localhost:5000/test_person').then((res) => {
+      return res.data
+    }).then((res) => {
+      console.log('2')
+      console.log(res)
+      return {
+        name: res.NAME,
+        universityId: 'UCSF',
+        home: res['WAYPNTS'][0],
+        time: res.DPRTRT,
+        shared: true,
+        Riders: res.PSSNGRS,
+        capacity: res.DRVRCAP
+      }
     })
 }
 
@@ -275,6 +310,7 @@ useEffect(() => {
             }
         )
     })
+    setCurrKey(1)
 },[])
 
 
@@ -285,7 +321,7 @@ useEffect(() => {
         <Menu
             theme="dark"
             mode="horizontal"
-            defaultSelectedKeys={['1']}
+            defaultSelectedKeys={'1'}
             items = {[
                 {key: 1, label : 'My Info'},
                 {key: 2, label : 'My Riders'},
