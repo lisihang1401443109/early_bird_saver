@@ -9,7 +9,7 @@ import { OpenStreetMapProvider } from 'leaflet-geosearch';
 import markerIconPng from "leaflet/dist/images/marker-icon.png"
 import {Icon} from 'leaflet'
 
-const provider = new OpenStreetMapProvider();
+
 
 const Driver = (props) => {
 
@@ -29,7 +29,6 @@ const Driver = (props) => {
     const matchDriver = () => {
         return doMatch(userInfo.pickupLocation, userInfo.scheduledTime, userInfo.universityId)
     }
-
 
 
 
@@ -79,19 +78,19 @@ const Driver = (props) => {
     )
 }
 
-const MyMap = () => {
+const MyMap = (props) => {
+
+    const setCurrLoc = props.setCurrLoc
+    
     const [position, setPosition] = useState(null)
     const map = useMapEvents({
       click(e) {
         console.log(e)
         setPosition(e.latlng)
+        setCurrLoc(e.latlng)
       },
     })
 
-    useEffect(() => {
-        console.log('loaded')
-        map.locate()
-    }, [])
   
     return position === null ? null : (
       <Marker position={position} icon={new Icon({iconUrl: markerIconPng, iconSize: [25, 41], iconAnchor: [12, 41]})} >
@@ -121,10 +120,26 @@ const PeopleInfo = (props) => {
 
     console.log(selfInfo)
 
+    const updateUserInformation = (userInfo) => {
+        return 0
+    }
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [matchedDriver, setMatchedDriver] = useState([])
     const [matched, setMatched] = useState(0)
     const [mapOn, setMapOn] = useState(false)
+    const [currLoc, setCurrLoc] = useState([])
+
+    useEffect(() => {
+        setCurrLoc(selfInfo.home)
+    }, [])
+
+    useEffect(() => {
+        const temp = {...selfInfo}
+        temp.home = currLoc
+        updateUserInformation(temp)
+    }, [currLoc])
+    
 
     const showModal = () => {
         console.log()
@@ -160,7 +175,7 @@ const PeopleInfo = (props) => {
             <div>
             <p>Your Name: {selfInfo.name}</p>
             <p>Your Univeristy: {selfInfo.universityId}</p>
-            <p>Your Pick Up Location: <a onClick={() => setMapOn((prev) => {return !prev})}>{selfInfo.home}</a></p>
+            <p>Your Pick Up Location: <a onClick={() => setMapOn((prev) => {return !prev})}>{currLoc.lat + ', ' + currLoc.lng}</a></p>
             <p>Your Scheduled Time: {selfInfo.time}</p>
             </div>
             <Button type='primary' onClick={showModal}>find match</Button></div>
@@ -180,13 +195,13 @@ const PeopleInfo = (props) => {
         </Card>
         {mapOn && 
         <>
-            <MapContainer center={[51.505, -0.09]} zoom={13} scrollWheelZoom={true}>
+            <MapContainer center={[37.7591842,-122.4607287]} zoom={13} scrollWheelZoom={true}>
                 <div style = {{height: '300px', width: '300px'}}></div>
                 <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     />
-                <MyMap></MyMap>
+                <MyMap setCurrLoc = {setCurrLoc}></MyMap>
             </MapContainer>
         </>
         }
