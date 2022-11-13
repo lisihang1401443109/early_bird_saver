@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom"
 import { useEffect, useState } from "react"
-import { Breadcrumb, Layout, Menu, Card, Button, Modal } from 'antd';
+import { Breadcrumb, Layout, Menu, Card, Button, Modal, Popover } from 'antd';
 import { MapContainer, TileLayer, useMap, useMapEvents } from 'react-leaflet'
 import {Marker, Popup} from 'react-leaflet'
 import "leaflet/dist/leaflet.css"
@@ -8,6 +8,7 @@ import 'leaflet-geosearch/dist/geosearch.css';
 import { OpenStreetMapProvider } from 'leaflet-geosearch';
 import markerIconPng from "leaflet/dist/images/marker-icon.png"
 import {Icon} from 'leaflet'
+import { DatePicker, Space } from 'antd';
 
 
 
@@ -59,7 +60,7 @@ const Driver = (props) => {
 
     return (
         <div className="site-card-border-less-wrapper">
-        <Card title={driverID >= 0 ? 'Your Driver' : 'No Driver'} bordered={false} style={{ width: 300 }}>
+        <Card title={driverID >= 0 ? 'Your Driver' : 'No Driver'} bordered={false} style={{ width: 500 }}>
         {driverID > -1 ? 
         <div>
             <div>
@@ -118,7 +119,7 @@ const PeopleInfo = (props) => {
         return doMatch(selfInfo.pickupLocation, selfInfo.scheduledTime, selfInfo.universityId)
     }
 
-    console.log(selfInfo)
+    // console.log(selfInfo)
 
     const updateUserInformation = (userInfo) => {
         return 0
@@ -129,16 +130,19 @@ const PeopleInfo = (props) => {
     const [matched, setMatched] = useState(0)
     const [mapOn, setMapOn] = useState(false)
     const [currLoc, setCurrLoc] = useState([])
+    const [currDate, setCurrDate] = useState('')
 
     useEffect(() => {
         setCurrLoc(selfInfo.home)
+        setCurrDate(selfInfo.time)
     }, [])
 
     useEffect(() => {
         const temp = {...selfInfo}
         temp.home = currLoc
         updateUserInformation(temp)
-    }, [currLoc])
+    }, [currLoc, currDate])
+
     
 
     const showModal = () => {
@@ -168,15 +172,29 @@ const PeopleInfo = (props) => {
         setIsModalOpen(false);
     };
 
+    const onChange = (date, dateString) => {
+        console.log(date, dateString);
+        setCurrDate((orig) => dateString)
+    };
+
+    const content = (
+        <div>
+            <Space direction="vertical">
+                <DatePicker onChange={onChange} showTime={true}/>
+            </Space>
+        </div>
+    )
+
+
     return (        
     <div className="site-card-border-less-wrapper">
-        <Card title="Your Info" bordered={false} style={{ width: 300 }}> 
+        <Card title="Your Info" bordered={false} style={{ width: 500 }}> 
         <div>
             <div>
             <p>Your Name: {selfInfo.name}</p>
             <p>Your Univeristy: {selfInfo.universityId}</p>
             <p>Your Pick Up Location: <a onClick={() => setMapOn((prev) => {return !prev})}>{currLoc.lat + ', ' + currLoc.lng}</a></p>
-            <p>Your Scheduled Time: {selfInfo.time}</p>
+            <div>Your Scheduled Time:  <Popover content={content} title="Title" trigger="click"><Button>{currDate? currDate : "Find Your Time"}</Button></Popover></div>
             </div>
             <Button type='primary' onClick={showModal}>find match</Button></div>
             <Modal title="Basic Modal" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
@@ -237,7 +255,7 @@ const People = () => {
     }
 
     useEffect(() => {
-        console.log(user)
+        // console.log(user)
         getUserInfo(userId).then(ppl => {
             setUser((usr) => {
                     // console.log(Object.keys(ppl))
