@@ -3,6 +3,14 @@ import { Button, Checkbox, Form, Input, Select } from 'antd';
 import { useNavigate } from "react-router-dom";
 import 'antd/dist/antd.css';
 
+const Failed = () => {
+    return (
+    <div id="fail_info">
+
+    </div>
+    )
+}
+
 const Myform = () => {
 
     const usernameRef = useRef('')
@@ -13,6 +21,7 @@ const Myform = () => {
     const loginWithCredentials = (username, password, typeUser) => {
         return new Promise( (resolve, reject) => {
             resolve('success')
+            reject('failed')
         } )
     }
 
@@ -24,11 +33,11 @@ const Myform = () => {
         const login = loginWithCredentials(usernameRef.current.input.value, passwordRef.current.input.value, typeUser);
         login.then(
             (res) => {
-                navigator('/'+typeUser)
+                navigator('/' + typeUser + '?userId=' + res)
             }
         ).catch(
             (error) => {
-                console.log(error)
+                document.getElementById('fail_info').innerHTML = error
             }
         )
     }
@@ -47,6 +56,8 @@ const Myform = () => {
         onFinishFailed={() => {console.log('finish failed')}}
         autoComplete="off"
     >
+      <Failed></Failed>
+
       <Form.Item
         label="Username"
         name="username"
@@ -70,9 +81,9 @@ const Myform = () => {
           </Select>
       </Form.Item>
 
-      <Form.Item name="remember" valuePropName="checked" wrapperCol={{ offset: 8, span: 16 }}>
+      {/* <Form.Item name="remember" valuePropName="checked" wrapperCol={{ offset: 8, span: 16 }}>
         <Checkbox>Remember me</Checkbox>
-      </Form.Item>
+      </Form.Item> */}
 
       <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
         <Button type="primary" htmlType="submit">
